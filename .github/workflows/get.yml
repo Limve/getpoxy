@@ -22,7 +22,7 @@ jobs:
           cat fileurl | while IFS= read -r link; do
             filename=$(basename "$link")
             if wget --timeout=10 --tries=1 --no-check-certificate -O "bcks/$filename" "$link"; then
-              echo "$link" >> bcks/pool
+              cat "bcks/$filename" >> bcks/pool
             else
               echo "Failed to download $link. Skipping..."
             fi
