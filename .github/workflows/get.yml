@@ -31,6 +31,9 @@ jobs:
       - name: Remove Duplicate Entries
         run: sort -u -o bcks/pool bcks/pool
 
+      - name: Remove Downloaded Files
+        run: rm -rf bcks/*
+
       - name: List Downloaded Files
         run: ls -l bcks
 
