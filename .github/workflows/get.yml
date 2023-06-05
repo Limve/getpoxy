@@ -24,7 +24,7 @@ jobs:
             if wget --no-check-certificate -O "bcks/$filename" "$link"; then
               echo "$link" >> bcks/pool
             else
-              echo "Skipping $link due to download error"
+              echo "Failed to download $link. Skipping..."
             fi
           done
 
