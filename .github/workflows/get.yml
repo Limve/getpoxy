@@ -24,17 +24,16 @@ jobs:
               *ssr://*)
                 # Handle SSR subscription link
                 decoded_link=$(echo "$link" | cut -d '/' -f 4 | base64 -d)
-                echo "$decoded_link" >> bcks/pool
+                echo "$decoded_link" | sed 's/ssr:\/\//vmess:\/\//' >> bcks/pool
                 ;;
               *vmess://*)
                 # Handle V2Ray subscription link
-                decoded_link=$(echo "$link" | base64 -d)
-                echo "$decoded_link" >> bcks/pool
+                echo "$link" >> bcks/pool
                 ;;
               *clash://*)
                 # Handle Clash subscription link
                 decoded_link=$(echo "$link" | cut -d '/' -f 3 | base64 -d)
-                echo "$decoded_link" >> bcks/pool
+                echo "$decoded_link" | sed 's/clash:\/\//vmess:\/\//' >> bcks/pool
                 ;;
               *)
                 # Handle other subscription link types here
