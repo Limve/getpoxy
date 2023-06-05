@@ -20,26 +20,23 @@ jobs:
         id: download_files
         run: |
           cat ${{ github.workspace }}/fileurl | while IFS= read -r link; do
-            case "$link" in
-              *ssr://*)
-                # Handle SSR subscription link
-                decoded_link=$(echo "$link" | cut -d '/' -f 4 | base64 -d)
-                echo "$decoded_link" | sed 's/ssr:\/\//vmess:\/\//' >> ${{ github.workspace }}/bcks/pool
-                ;;
-              *vmess://*)
-                # Handle V2Ray subscription link
-                echo "$link" >> ${{ github.workspace }}/bcks/pool
-                ;;
-              *clash://*)
-                # Handle Clash subscription link
-                decoded_link=$(echo "$link" | cut -d '/' -f 3 | base64 -d)
-                echo "$decoded_link" | sed 's/clash:\/\//vmess:\/\//' >> ${{ github.workspace }}/bcks/pool
-                ;;
-              *)
-                # Handle other subscription link types here
-                # Add appropriate code to handle the link type
-                ;;
-            esac
+            if [[ "$link" =~ ^ssr:// ]]; then
+              # Handle SSR subscription link
+              decoded_link=$(echo "$link" | cut -d '/' -f 4 | base64 -d)
+              echo "$decoded_link" | sed 's/ssr:\/\//vmess:\/\//' >> ${{ github.workspace }}/bcks/pool
+            elif [[ "$link" =~ ^vmess:// ]]; then
+              # Handle V2Ray subscription link
+              echo "$link" >> ${{ github.workspace }}/bcks/pool
+            elif [[ "$link" =~ ^clash:// ]]; then
+              # Handle Clash subscription link
+              decoded_link=$(echo "$link" | cut -d '/' -f 3 | base64 -d)
+              echo "$decoded_link" | sed 's/clash:\/\//vmess:\/\//' >> ${{ github.workspace }}/bcks/pool
+            else
+              # Handle other subscription link types here
+              # Add appropriate code to handle the link type
+              # For example, you can ignore or skip the link
+              continue
+            fi
           done
 
       - name: Check for Changes
