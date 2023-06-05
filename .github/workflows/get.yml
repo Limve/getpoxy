@@ -1,0 +1,43 @@
+name: getpoxy
+
+on:
+  schedule:
+    - cron: '35 * */5 * *'
+  workflow_dispatch:
+
+jobs:
+  download_and_write:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Create Bcks Directory
+        run: mkdir -p bcks
+
+      - name: Download and Write Files
+        id: download_files
+        run: |
+          cat fileurl | while IFS= read -r link; do
+            filename=$(basename "$link")
+            if wget --no-check-certificate -O "bcks/$filename" "$link"; then
+              echo "$link" >> bcks/pool
+            else
+              echo "Skipping $link due to download error"
+            fi
+          done
+
+      - name: Remove Duplicate Entries
+        run: sort -u -o bcks/pool bcks/pool
+
+      - name: List Downloaded Files
+        run: ls -l bcks
+
+      - name: Commit and Push Changes
+        run: |
+          git config --local user.email "actions@github.com"
+          git config --local user.name "GitHub Actions"
+          git add bcks
+          git commit -m "Update files"
+          git push
