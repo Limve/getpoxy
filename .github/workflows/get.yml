@@ -31,6 +31,11 @@ jobs:
                 decoded_link=$(echo "$link" | base64 -d)
                 echo "$decoded_link" >> bcks/pool
                 ;;
+              *clash://*)
+                # Handle Clash subscription link
+                decoded_link=$(echo "$link" | cut -d '/' -f 3 | base64 -d)
+                echo "$decoded_link" >> bcks/pool
+                ;;
               *)
                 # Handle other subscription link types here
                 # Add appropriate code to handle the link type
