@@ -43,6 +43,15 @@ jobs:
             esac
           done
 
+      - name: Check for Changes
+        id: check_changes
+        run: |
+          if [ -z "$(git status --porcelain)" ]; then
+            echo "::set-output name=changes::false"
+          else
+            echo "::set-output name=changes::true"
+          fi
+
       - name: Remove Duplicate Entries
         run: sort -u -o bcks/pool bcks/pool
 
@@ -50,6 +59,7 @@ jobs:
         run: ls -l bcks
 
       - name: Commit and Push Changes
+        if: steps.check_changes.outputs.changes == 'true'
         run: |
           git config --local user.email "actions@github.com"
           git config --local user.name "GitHub Actions"
