@@ -24,42 +24,33 @@ jobs:
               *ssr://*)
                 # Handle SSR subscription link
                 decoded_link=$(echo "$link" | cut -d '/' -f 4 | base64 -d)
-                echo "$decoded_link" | sed 's/ssr:\/\//vemss:\/\//' >> ${{ github.workspace }}/bcks/pool
+                echo "$decoded_link" | sed 's/ssr:\/\//vemss:\/\//' >> ${{ github.workspace }}/bcks/pool.tmp
                 ;;
               *vmess://*)
                 # Handle V2Ray subscription link
-                echo "$link" >> ${{ github.workspace }}/bcks/pool
+                echo "$link" >> ${{ github.workspace }}/bcks/pool.tmp
                 ;;
               *clash://*)
                 # Handle Clash subscription link
                 decoded_link=$(echo "$link" | cut -d '/' -f 3 | base64 -d)
-                echo "$decoded_link" | sed 's/clash:\/\//vemss:\/\//' >> ${{ github.workspace }}/bcks/pool
+                echo "$decoded_link" | sed 's/clash:\/\//vemss:\/\//' >> ${{ github.workspace }}/bcks/pool.tmp
                 ;;
               *)
                 # Handle other subscription link types here
                 # Convert link to vemss:// format
-                echo "$link" | sed 's/^vemss:\/\//vemss:\/\//' >> ${{ github.workspace }}/bcks/pool
+                echo "$link" | sed 's/^vemss:\/\//vemss:\/\//' >> ${{ github.workspace }}/bcks/pool.tmp
                 ;;
             esac
+            wget "$link" -O - >> ${{ github.workspace }}/bcks/pool.tmp
           done
 
-      - name: Check for Changes
-        id: check_changes
-        run: |
-          if [ -z "$(git status --porcelain)" ]; then
-            echo "::set-output name=changes::false"
-          else
-            echo "::set-output name=changes::true"
-          fi
-
       - name: Remove Duplicate Entries
-        run: sort -u -o ${{ github.workspace }}/bcks/pool ${{ github.workspace }}/bcks/pool
+        run: sort -u -o ${{ github.workspace }}/bcks/pool ${{ github.workspace }}/bcks/pool.tmp
 
       - name: List Downloaded Files
         run: ls -l ${{ github.workspace }}/bcks
 
       - name: Commit and Push Changes
-        if: steps.check_changes.outputs.changes == 'true'
         run: |
           git config --local user.email "actions@github.com"
           git config --local user.name "GitHub Actions"
