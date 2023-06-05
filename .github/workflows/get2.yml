@@ -1,0 +1,47 @@
+name: Download and Convert Files
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Create pool directory
+        run: mkdir -p bcks
+
+      - name: Download and Convert Files
+        run: |
+          # Read the file containing the URLs
+          cat fileurl | while read -r url; do
+            # Download the file
+            curl -LO "$url"
+            
+            # Convert the content to vemss:// format
+            converted_content=$(cat "$(basename "$url")" | sed 's|^|vemss://|')
+            
+            # Save the converted content to the pool file
+            echo "$converted_content" >> bcks/pool
+            
+            # Remove the downloaded file
+            rm "$(basename "$url")"
+          done
+
+      - name: Remove Duplicate Content
+        run: |
+          # Change directory to the bcks directory
+          cd bcks
+          
+          # Remove duplicate lines from the pool file
+          sort -u -o pool pool
+
+      - name: Commit and Push Changes
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: Update pool file
