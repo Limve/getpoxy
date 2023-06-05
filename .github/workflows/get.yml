@@ -31,6 +31,9 @@ jobs:
       - name: Remove Duplicate Entries
         run: sort -u -o bcks/pool bcks/pool
 
+      - name: Move Pool File
+        run: mv bcks/pool bcks/pool.txt
+
       - name: Remove Downloaded Files
         run: rm -rf bcks/*
 
