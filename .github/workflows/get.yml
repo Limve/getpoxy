@@ -20,22 +20,26 @@ jobs:
         id: download_files
         run: |
           cat fileurl | while IFS= read -r link; do
-            filename=$(basename "$link")
-            if wget --timeout=10 --tries=1 --no-check-certificate -O "bcks/$filename" "$link"; then
-              cat "bcks/$filename" >> bcks/pool
-            else
-              echo "Failed to download $link. Skipping..."
-            fi
+            case "$link" in
+              *ssr://*)
+                # Handle SSR subscription link
+                decoded_link=$(echo "$link" | cut -d '/' -f 4 | base64 -d)
+                echo "$decoded_link" >> bcks/pool
+                ;;
+              *vmess://*)
+                # Handle V2Ray subscription link
+                decoded_link=$(echo "$link" | base64 -d)
+                echo "$decoded_link" >> bcks/pool
+                ;;
+              *)
+                # Handle other subscription link types here
+                # Add appropriate code to handle the link type
+                ;;
+            esac
           done
 
       - name: Remove Duplicate Entries
         run: sort -u -o bcks/pool bcks/pool
-
-      - name: Move Pool File
-        run: mv bcks/pool bcks/pool.txt
-
-      - name: Remove Downloaded Files
-        run: rm -rf bcks/*
 
       - name: List Downloaded Files
         run: ls -l bcks
